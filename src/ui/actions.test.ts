@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { OpenWhere } from "../shared/protocol";
 import { ACTIONS, type Ctx } from "./actions";
-import { sample } from "./tree.test";
+import { sample } from "./test-fixtures";
 import { clamp, flatten, indexTree, type Row } from "./tree";
 
 /** Minimal in-memory Ctx mirroring the app's behaviour. */
@@ -28,6 +28,12 @@ function makeCtx(expandedIds: string[], cursorId: string) {
     open: (w) => opened.push(w),
     close: () => { closed = true; },
     message: (t) => messages.push(t),
+    filtered: false,
+    startSearch: () => {},
+    acceptSearch: () => {},
+    cancelSearch: () => {},
+    clearSearch: () => {},
+    jumpMatch: () => {},
   };
   const run = (action: string, count: number | null = null) => ACTIONS[action]!(ctx, count);
   const at = () => rows[cursor]?.node.id;

@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { KeyEngine, type Binding, type Match } from "./engine";
 import { parseKeys } from "./keys";
 
-function setup(bindings: Binding[]) {
+function setup(bindings: Binding[], counts = true) {
   const fired: Match[] = [];
-  const engine = new KeyEngine(bindings, (m) => fired.push(m), 1000);
+  const engine = new KeyEngine(bindings, (m) => fired.push(m), { timeoutMs: 1000, counts });
   const type = (spec: string) => parseKeys(spec).map((t) => engine.feed(t));
   return { engine, fired, type };
 }
@@ -75,6 +75,13 @@ describe("KeyEngine", () => {
 
     type("dd");
     expect(fired.at(-1)).toEqual({ action: "long", count: null });
+  });
+
+  it("can disable counts so digits pass through", () => {
+    const { fired, type } = setup([{ keys: "<CR>", action: "accept" }], false);
+    expect(type("5")).toEqual([false]);
+    type("<CR>");
+    expect(fired).toEqual([{ action: "accept", count: null }]);
   });
 
   it("later bindings override earlier ones; nop unbinds", () => {

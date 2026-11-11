@@ -1,3 +1,4 @@
+import type { Hit } from "./search";
 import type { Row } from "./tree";
 
 export const ROW_HEIGHT = 20;
@@ -15,6 +16,7 @@ export class TreeView {
   private readonly layer: HTMLElement;
   private rows: readonly Row[] = [];
   private cursor = 0;
+  private hits: ReadonlyMap<string, Hit> | undefined;
 
   constructor(private readonly body: HTMLElement, handlers: ViewHandlers) {
     this.spacer = document.createElement("div");
@@ -43,9 +45,10 @@ export class TreeView {
     return Math.max(1, Math.floor(this.body.clientHeight / ROW_HEIGHT));
   }
 
-  update(rows: readonly Row[], cursor: number): void {
+  update(rows: readonly Row[], cursor: number, hits?: ReadonlyMap<string, Hit>): void {
     this.rows = rows;
     this.cursor = cursor;
+    this.hits = hits;
     this.spacer.style.height = `${rows.length * ROW_HEIGHT}px`;
     this.scrollToCursor();
     this.paint();
@@ -68,7 +71,10 @@ export class TreeView {
     const end = Math.min(this.rows.length, Math.ceil((top + height) / ROW_HEIGHT) + OVERSCAN);
     this.layer.style.transform = `translateY(${start * ROW_HEIGHT}px)`;
     const nodes: HTMLElement[] = [];
-    for (let i = start; i < end; i++) nodes.push(renderRow(this.rows[i]!, i, i === this.cursor));
+    for (let i = start; i < end; i++) {
+      const row = this.rows[i]!;
+      nodes.push(renderRow(row, i, i === this.cursor, this.hits?.get(row.node.id)));
+    }
     this.layer.replaceChildren(...nodes);
   }
 }
@@ -88,10 +94,50 @@ function host(url: string): string {
   }
 }
 
-function renderRow(row: Row, index: number, isCursor: boolean): HTMLElement {
+/** Text with the given character indices wrapped in <mark>. */
+function highlighted(className: string, text: string, positions: readonly number[] = []): HTMLSpanElement {
+  const s = span(className, "");
+  if (positions.length === 0) {
+    s.textContent = text;
+    return s;
+  }
+  const set = new Set(positions);
+  let run = "";
+  let inMark = false;
+  const flush = (): void => {
+    if (run === "") return;
+    if (inMark) {
+      const m = document.createElement("mark");
+      m.textContent = run;
+      s.append(m);
+    } else {
+      s.append(run);
+    }
+    run = "";
+  };
+  for (let i = 0; i < text.length; i++) {
+    const mark = set.has(i);
+    if (mark !== inMark) {
+      flush();
+      inMark = mark;
+    }
+    run += text[i];
+  }
+  flush();
+  return s;
+}
+
+/** Shift URL match positions onto the displayed host substring. */
+function hostPositions(url: string, shown: string, positions: readonly number[]): number[] {
+  const start = url.indexOf(shown);
+  if (start < 0) return [];
+  return positions.filter((p) => p >= start && p < start + shown.length).map((p) => p - start);
+}
+
+function renderRow(row: Row, index: number, isCursor: boolean, hit: Hit | undefined): HTMLElement {
   const { node, depth } = row;
   const el = document.createElement("div");
-  el.className = `vb-row vb-${node.kind}${isCursor ? " vb-cursor" : ""}`;
+  el.className = `vb-row vb-${node.kind}${isCursor ? " vb-cursor" : ""}${hit ? " vb-hit" : ""}`;
   el.dataset.index = String(index);
   el.setAttribute("role", "treeitem");
   el.setAttribute("aria-level", String(depth + 1));
@@ -103,14 +149,20 @@ function renderRow(row: Row, index: number, isCursor: boolean): HTMLElement {
       el.setAttribute("aria-expanded", String(row.open));
       el.append(
         span("vb-fold", row.open ? "▾ " : "▸ "),
-        span("vb-name", node.title || "(untitled)"),
+        highlighted("vb-name", node.title || "(untitled)", node.title ? hit?.title : []),
         span("vb-count", ` ${node.children?.length ?? 0}`),
       );
       break;
     }
     case "bookmark": {
-      el.append(span("vb-fold", "  "), span("vb-name", node.title || node.url || "(untitled)"));
-      if (node.url) el.append(span("vb-url", host(node.url)));
+      const name = node.title
+        ? highlighted("vb-name", node.title, hit?.title)
+        : highlighted("vb-name", node.url || "(untitled)", node.url ? hit?.url : []);
+      el.append(span("vb-fold", "  "), name);
+      if (node.url) {
+        const shown = host(node.url);
+        el.append(highlighted("vb-url", shown, hit ? hostPositions(node.url, shown, hit.url) : []));
+      }
       break;
     }
     case "separator":

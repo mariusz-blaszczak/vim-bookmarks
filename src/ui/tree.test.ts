@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { BNode } from "../shared/types";
+import { sample } from "./test-fixtures";
 import { flatten, indexTree, parentRow } from "./tree";
-
-const bm = (id: string, title = id): BNode => ({ id, title, kind: "bookmark", url: `https://${id}.test/` });
-const folder = (id: string, children: BNode[], title = id): BNode => ({ id, title, kind: "folder", children });
-
-export const sample: BNode[] = [
-  folder("bar", [bm("gh"), folder("dev", [bm("mdn"), bm("rust")]), bm("news")]),
-  folder("other", [bm("misc")]),
-];
 
 const ids = (rows: { node: BNode }[]) => rows.map((r) => r.node.id);
 

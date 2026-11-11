@@ -13,6 +13,8 @@
   --vb-cursor-bg: #e4ebf8;
   --vb-folder: #1f5fbf;
   --vb-error: #c62828;
+  --vb-search: #b5651d;
+  --vb-match: #b5651d;
 
   position: fixed;
   inset: 0;
@@ -40,6 +42,8 @@
     --vb-cursor-bg: #262b36;
     --vb-folder: #7aa2f7;
     --vb-error: #f7768e;
+    --vb-search: #e0af68;
+    --vb-match: #e0af68;
   }
 }
 
@@ -179,5 +183,70 @@
 
 .vb-pos {
   padding-right: 12px;
+  color: var(--vb-dim);
+}
+
+/* ---- Search ------------------------------------------------------------ */
+
+.vb-mode-search {
+  background: var(--vb-search);
+}
+
+.vb-row mark {
+  background: none;
+  color: var(--vb-match);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Ancestors shown only for context while filtering. */
+.vb-filtered .vb-row:not(.vb-hit) .vb-name,
+.vb-filtered .vb-row:not(.vb-hit) .vb-count {
+  opacity: 0.55;
+}
+
+.vb-cmdline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 22px;
+  padding: 0 12px;
+  white-space: pre;
+}
+
+.vb-prompt {
+  color: var(--vb-search);
+  font-weight: 700;
+}
+
+.vb-input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  caret-color: var(--vb-accent);
+}
+
+.vb-cmdtext {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vb-prompt[hidden],
+.vb-input[hidden] {
+  display: none;
+}
+
+.vb-cmdright {
+  flex: none;
+  padding-left: 2ch;
   color: var(--vb-dim);
 }

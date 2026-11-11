@@ -34,7 +34,7 @@ sterowany klawiaturą (domyślnie Vim, w pełni przemapowywalne).
 | `j k` `gg G` `<C-d> <C-u>` | ruch |
 | `h l` `za` `zo zc` `zM zR` `-` | zwiń / rozwiń / przełącz / wszystko / do rodzica |
 | `<CR>` `t` `T` `w` | otwórz: tutaj / nowa karta / tło / nowe okno |
-| `/` `n` `N` | fuzzy filtr po tytule i URL |
+| `/` `n` `N` | fuzzy filtr po tytule i URL (w prompcie: `<CR>` zatwierdź, `<Esc>` anuluj, `<C-n>`/`<C-p>` następne/poprzednie) |
 | `a` `A` | dodaj bieżącą stronę / nowy folder |
 | `r` `e` | zmień nazwę / edytuj URL |
 | `dd` `yy` `p` `P` | wytnij / kopiuj / wklej za / przed |
@@ -42,7 +42,7 @@ sterowany klawiaturą (domyślnie Vim, w pełni przemapowywalne).
 | `V` + operator | operacje grupowe |
 | `u` `<C-r>` | undo / redo |
 | `:` | komendy (`:mkdir`, `:sort`, `:map`) |
-| `q` `<Esc>` | zamknij |
+| `q` `<Esc>` | zamknij (`<Esc>` najpierw zdejmuje aktywny filtr) |
 
 ## Undo
 Odwrotne operacje: usunięcie → snapshot poddrzewa i rekurencyjne odtworzenie z mapą `stareID → noweID`;
@@ -52,7 +52,7 @@ Stos w `storage.session` (SW w MV3 może zostać ubity).
 ## Kamienie milowe
 - [x] **M0** — szkielet: build na obie przeglądarki, skrót otwiera/zamyka pusty overlay w Shadow DOM, fallback window.
 - [x] **M1** — odczyt: drzewo, ruch, zwijanie/rozwijanie, otwieranie, statusline.
-- [ ] **M2** — wyszukiwanie: `/` fuzzy, `n`/`N`, podświetlanie.
+- [x] **M2** — wyszukiwanie: `/` fuzzy, `n`/`N`, podświetlanie.
 - [ ] **M3** — edycja: dodaj/zmień/usuń/wytnij/kopiuj/wklej/foldery, live refresh po `bookmarks.on*`.
 - [ ] **M4** — visual mode + undo/redo.
 - [ ] **M5** — konfiguracja: strona opcji, keymap w `storage.sync`, `:map`, motyw.

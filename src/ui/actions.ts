@@ -13,6 +13,15 @@ export interface Ctx {
   open(where: OpenWhere): void;
   close(): void;
   message(text: string, error?: boolean): void;
+
+  /** True while a search filter is applied to the tree. */
+  readonly filtered: boolean;
+  startSearch(): void;
+  acceptSearch(): void;
+  cancelSearch(): void;
+  clearSearch(): void;
+  /** Move to the next (+1) / previous (-1) match, wrapping around. */
+  jumpMatch(direction: 1 | -1, count: number): void;
 }
 
 export type ActionFn = (ctx: Ctx, count: number | null) => void;
@@ -91,5 +100,13 @@ export const ACTIONS: Record<string, ActionFn> = {
   "open.background": openOrToggle("background"),
   "open.newWindow": openOrToggle("newWindow"),
 
+  "search.start": (ctx) => ctx.startSearch(),
+  "search.accept": (ctx) => ctx.acceptSearch(),
+  "search.cancel": (ctx) => ctx.cancelSearch(),
+  "search.clear": (ctx) => ctx.clearSearch(),
+  "search.next": (ctx, n) => ctx.jumpMatch(1, n ?? 1),
+  "search.prev": (ctx, n) => ctx.jumpMatch(-1, n ?? 1),
+
   close: (ctx) => ctx.close(),
+  escape: (ctx) => (ctx.filtered ? ctx.clearSearch() : ctx.close()),
 };

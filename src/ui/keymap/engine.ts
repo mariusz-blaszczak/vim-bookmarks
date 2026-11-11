@@ -1,8 +1,22 @@
 import { parseKeys } from "./keys";
 
+export type KeyMode = "normal" | "search";
+
 export interface Binding {
+  /** Defaults to "normal". */
+  mode?: KeyMode;
   keys: string;
   action: string;
+}
+
+export interface EngineOptions {
+  timeoutMs?: number;
+  /** Whether leading digits are collected as a count (off for text-entry modes). */
+  counts?: boolean;
+}
+
+export function bindingsFor(mode: KeyMode, bindings: readonly Binding[]): Binding[] {
+  return bindings.filter((b) => (b.mode ?? "normal") === mode);
 }
 
 export interface Match {
@@ -29,11 +43,16 @@ export class KeyEngine {
   private countStr = "";
   private timer: ReturnType<typeof setTimeout> | undefined;
 
+  private readonly timeoutMs: number;
+  private readonly counts: boolean;
+
   constructor(
     bindings: readonly Binding[],
     private readonly onAction: (m: Match) => void,
-    private readonly timeoutMs = 1000,
+    { timeoutMs = 1000, counts = true }: EngineOptions = {},
   ) {
+    this.timeoutMs = timeoutMs;
+    this.counts = counts;
     // Later bindings override earlier ones with the same keys.
     const byKeys = new Map<string, Compiled>();
     for (const b of bindings) {
@@ -57,7 +76,7 @@ export class KeyEngine {
       return true;
     }
 
-    if (this.seq.length === 0 && /^[0-9]$/.test(token) && (token !== "0" || this.countStr !== "")) {
+    if (this.counts && this.seq.length === 0 && /^[0-9]$/.test(token) && (token !== "0" || this.countStr !== "")) {
       this.countStr += token;
       return true;
     }
