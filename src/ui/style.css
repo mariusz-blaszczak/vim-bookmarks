@@ -15,6 +15,9 @@
   --vb-error: #c62828;
   --vb-search: #b5651d;
   --vb-match: #b5651d;
+  --vb-star: #c99700;
+  --vb-lock: #8a6d3b;
+  --vb-bolt: #c27c0e;
 
   position: fixed;
   inset: 0;
@@ -44,6 +47,9 @@
     --vb-error: #f7768e;
     --vb-search: #e0af68;
     --vb-match: #e0af68;
+    --vb-star: #e5c07b;
+    --vb-lock: #c9a26b;
+    --vb-bolt: #e0af68;
   }
 }
 
@@ -336,4 +342,32 @@
 
 .vb-mode-help {
   background: var(--vb-folder);
+}
+
+/* ---- Icons (monochrome, one color per kind) ----------------------------- */
+
+.vb-icon {
+  flex: none;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 1ch;
+  color: var(--vb-dim);
+}
+
+.vb-icon-folder,
+.vb-icon-folderOpen {
+  color: var(--vb-folder);
+}
+
+.vb-icon-toolbar {
+  color: var(--vb-star);
+}
+
+.vb-icon-managed {
+  color: var(--vb-lock);
+}
+
+.vb-icon-script {
+  color: var(--vb-bolt);
 }

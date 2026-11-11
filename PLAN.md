@@ -56,6 +56,7 @@ Stos w `storage.session` (SW w MV3 może zostać ubity).
 - [x] **M2** — wyszukiwanie: `/` fuzzy, `n`/`N`, podświetlanie.
 - [x] **M3** — edycja: dodaj/zmień/usuń/wytnij/kopiuj/wklej/foldery, live refresh po `bookmarks.on*`.
 - [x] **M3.1** — pomoc `?`: ekran ze skrótami generowany z aktywnego keymapu (po M5 pokaże też własne mapowania).
+- [x] **M3.2** — ikony monochromatyczne (styl nvim-tree / Nerd Font): folder, pasek zakładek (gwiazdka), zarządzane (kłódka), strona (globus), PDF, bookmarklet (błyskawica), strony przeglądarki (zębatka).
 - [ ] **M4** — visual mode + undo/redo.
 - [ ] **M5** — konfiguracja: strona opcji, keymap w `storage.sync`, `:map`, motyw.
 - [ ] **M6** — szlif: wydajność (~10k zakładek), a11y (ARIA tree), paczki Chrome Web Store / AMO.

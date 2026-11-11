@@ -1,3 +1,4 @@
+import { renderIcon } from "./icons";
 import type { Hit } from "./search";
 import type { Row } from "./tree";
 
@@ -160,6 +161,7 @@ function renderRow(row: Row, index: number, isCursor: boolean, hit: Hit | undefi
       el.setAttribute("aria-expanded", String(row.open));
       el.append(
         span("vb-fold", row.open ? "▾ " : "▸ "),
+        renderIcon(node, row.open),
         highlighted("vb-name", node.title || "(untitled)", node.title ? hit?.title : []),
         span("vb-count", ` ${node.children?.length ?? 0}`),
       );
@@ -169,7 +171,7 @@ function renderRow(row: Row, index: number, isCursor: boolean, hit: Hit | undefi
       const name = node.title
         ? highlighted("vb-name", node.title, hit?.title)
         : highlighted("vb-name", node.url || "(untitled)", node.url ? hit?.url : []);
-      el.append(span("vb-fold", "  "), name);
+      el.append(span("vb-fold", "  "), renderIcon(node, false), name);
       if (node.url) {
         const shown = host(node.url);
         el.append(highlighted("vb-url", shown, hit ? hostPositions(node.url, shown, hit.url) : []));
@@ -177,7 +179,7 @@ function renderRow(row: Row, index: number, isCursor: boolean, hit: Hit | undefi
       break;
     }
     case "separator":
-      el.append(span("vb-fold", "  "), span("vb-sep", ""));
+      el.append(span("vb-fold", "  "), renderIcon(node, false), span("vb-sep", ""));
       break;
   }
   return el;
