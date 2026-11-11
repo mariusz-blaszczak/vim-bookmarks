@@ -5,6 +5,13 @@ export const ROW_HEIGHT = 20;
 const OVERSCAN = 8;
 const SCROLLOFF = 3;
 
+export interface RowMarks {
+  /** Search hits to highlight. */
+  hits?: ReadonlyMap<string, Hit> | undefined;
+  /** Nodes marked with dd. */
+  cut?: ReadonlySet<string>;
+}
+
 export interface ViewHandlers {
   onClick(index: number): void;
   onActivate(index: number): void;
@@ -17,6 +24,7 @@ export class TreeView {
   private rows: readonly Row[] = [];
   private cursor = 0;
   private hits: ReadonlyMap<string, Hit> | undefined;
+  private cut: ReadonlySet<string> = new Set();
 
   constructor(private readonly body: HTMLElement, handlers: ViewHandlers) {
     this.spacer = document.createElement("div");
@@ -45,10 +53,11 @@ export class TreeView {
     return Math.max(1, Math.floor(this.body.clientHeight / ROW_HEIGHT));
   }
 
-  update(rows: readonly Row[], cursor: number, hits?: ReadonlyMap<string, Hit>): void {
+  update(rows: readonly Row[], cursor: number, marks: RowMarks = {}): void {
     this.rows = rows;
     this.cursor = cursor;
-    this.hits = hits;
+    this.hits = marks.hits;
+    this.cut = marks.cut ?? new Set();
     this.spacer.style.height = `${rows.length * ROW_HEIGHT}px`;
     this.scrollToCursor();
     this.paint();
@@ -73,7 +82,9 @@ export class TreeView {
     const nodes: HTMLElement[] = [];
     for (let i = start; i < end; i++) {
       const row = this.rows[i]!;
-      nodes.push(renderRow(row, i, i === this.cursor, this.hits?.get(row.node.id)));
+      const el = renderRow(row, i, i === this.cursor, this.hits?.get(row.node.id));
+      if (this.cut.has(row.node.id)) el.classList.add("vb-cut");
+      nodes.push(el);
     }
     this.layer.replaceChildren(...nodes);
   }

@@ -1,4 +1,4 @@
-import type { BNode } from "../shared/types";
+import type { BNode, Target } from "../shared/types";
 
 export interface Row {
   node: BNode;
@@ -22,6 +22,8 @@ export function flatten(roots: readonly BNode[], expanded: ReadonlySet<string>):
 
 export interface TreeIndex {
   node(id: string): BNode | undefined;
+  /** Parent folder, or undefined for top-level folders. */
+  parent(id: string): BNode | undefined;
   /** Ancestors from the top level down to and including `id`. */
   path(id: string): BNode[];
   folderIds(): string[];
@@ -41,6 +43,10 @@ export function indexTree(roots: readonly BNode[]): TreeIndex {
 
   return {
     node: (id) => nodes.get(id),
+    parent: (id) => {
+      const p = parents.get(id);
+      return p === undefined ? undefined : nodes.get(p);
+    },
     path(id) {
       const out: BNode[] = [];
       for (let cur: string | undefined = id; cur !== undefined; cur = parents.get(cur)) {
@@ -65,4 +71,36 @@ export function parentRow(rows: readonly Row[], i: number): number {
 
 export function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
+}
+
+/** Built-in top-level folders and managed bookmarks can't be changed. */
+export function isProtected(index: TreeIndex, id: string): boolean {
+  return index.parent(id) === undefined || index.path(id).some((n) => n.locked);
+}
+
+export function countDescendants(node: BNode): number {
+  return (node.children ?? []).reduce((n, c) => n + 1 + countDescendants(c), 0);
+}
+
+/**
+ * Where new or pasted items go relative to the cursor row, so they appear
+ * right below ("after") or above ("before") it:
+ *  - after an open folder → its first child
+ *  - on a top-level folder → inside it (top level itself is fixed)
+ *  - otherwise → sibling of the cursor node
+ */
+export function insertTarget(row: Row, index: TreeIndex, where: "after" | "before"): Target {
+  const { node } = row;
+  if (node.kind === "folder" && where === "after" && row.open) {
+    return { parentId: node.id, afterId: null };
+  }
+  const parent = index.parent(node.id);
+  if (!parent) {
+    const last = node.children?.at(-1);
+    return { parentId: node.id, afterId: where === "after" && last ? last.id : null };
+  }
+  if (where === "after") return { parentId: parent.id, afterId: node.id };
+  const siblings = parent.children ?? [];
+  const i = siblings.findIndex((s) => s.id === node.id);
+  return { parentId: parent.id, afterId: i > 0 ? siblings[i - 1]!.id : null };
 }

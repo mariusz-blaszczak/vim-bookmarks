@@ -34,6 +34,9 @@ function makeCtx(expandedIds: string[], cursorId: string) {
     cancelSearch: () => {},
     clearSearch: () => {},
     jumpMatch: () => {},
+    promptAccept: () => {},
+    promptCancel: () => {},
+    edit: {} as Ctx["edit"],
   };
   const run = (action: string, count: number | null = null) => ACTIONS[action]!(ctx, count);
   const at = () => rows[cursor]?.node.id;

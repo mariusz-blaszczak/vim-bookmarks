@@ -1,4 +1,5 @@
 import type { OpenWhere } from "../shared/protocol";
+import type { Editor } from "./edit";
 import { parentRow, type Row } from "./tree";
 
 /** What actions can see and do. Implemented by the app. */
@@ -22,6 +23,10 @@ export interface Ctx {
   clearSearch(): void;
   /** Move to the next (+1) / previous (-1) match, wrapping around. */
   jumpMatch(direction: 1 | -1, count: number): void;
+
+  promptAccept(): void;
+  promptCancel(): void;
+  readonly edit: Editor;
 }
 
 export type ActionFn = (ctx: Ctx, count: number | null) => void;
@@ -106,6 +111,19 @@ export const ACTIONS: Record<string, ActionFn> = {
   "search.clear": (ctx) => ctx.clearSearch(),
   "search.next": (ctx, n) => ctx.jumpMatch(1, n ?? 1),
   "search.prev": (ctx, n) => ctx.jumpMatch(-1, n ?? 1),
+
+  "edit.addBookmark": (ctx) => void ctx.edit.addBookmark(),
+  "edit.addFolder": (ctx) => void ctx.edit.addFolder(),
+  "edit.rename": (ctx) => void ctx.edit.rename(),
+  "edit.editUrl": (ctx) => void ctx.edit.editUrl(),
+  "edit.cut": (ctx) => ctx.edit.cut(),
+  "edit.yank": (ctx) => ctx.edit.yank(),
+  "edit.pasteAfter": (ctx) => void ctx.edit.paste("after"),
+  "edit.pasteBefore": (ctx) => void ctx.edit.paste("before"),
+  "edit.delete": (ctx) => void ctx.edit.remove(),
+
+  "prompt.accept": (ctx) => ctx.promptAccept(),
+  "prompt.cancel": (ctx) => ctx.promptCancel(),
 
   close: (ctx) => ctx.close(),
   escape: (ctx) => (ctx.filtered ? ctx.clearSearch() : ctx.close()),

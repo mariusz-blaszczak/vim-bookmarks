@@ -10,5 +10,18 @@ export interface BNode {
   kind: NodeKind;
   url?: string;
   role?: RootRole;
+  /** Managed/enterprise bookmarks (Chrome) that cannot be modified. */
+  locked?: boolean;
   children?: BNode[];
+}
+
+/** Where to insert: inside `parentId`, right after sibling `afterId` (null = first). */
+export interface Target {
+  parentId: string;
+  afterId: string | null;
+}
+
+export interface PageInfo {
+  url: string;
+  title: string;
 }

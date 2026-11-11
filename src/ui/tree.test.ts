@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { BNode } from "../shared/types";
 import { sample } from "./test-fixtures";
-import { flatten, indexTree, parentRow } from "./tree";
+import { countDescendants, flatten, indexTree, insertTarget, isProtected, parentRow } from "./tree";
 
 const ids = (rows: { node: BNode }[]) => rows.map((r) => r.node.id);
 
@@ -41,5 +41,40 @@ describe("indexTree", () => {
 
   it("lists folder ids", () => {
     expect(index.folderIds().sort()).toEqual(["bar", "dev", "other"]);
+  });
+});
+
+describe("insertTarget", () => {
+  const index = indexTree(sample);
+  const rows = flatten(sample, new Set(["bar", "dev"]));
+  const row = (id: string) => rows.find((r) => r.node.id === id)!;
+
+  it("puts items next to a bookmark", () => {
+    expect(insertTarget(row("news"), index, "after")).toEqual({ parentId: "bar", afterId: "news" });
+    expect(insertTarget(row("dev"), index, "before")).toEqual({ parentId: "bar", afterId: "gh" });
+    expect(insertTarget(row("gh"), index, "before")).toEqual({ parentId: "bar", afterId: null });
+  });
+
+  it("puts items first inside an open folder when pasting after it", () => {
+    expect(insertTarget(row("dev"), index, "after")).toEqual({ parentId: "dev", afterId: null });
+  });
+
+  it("puts items inside top-level folders (first or last)", () => {
+    const closed = flatten(sample, new Set()).find((r) => r.node.id === "other")!;
+    expect(insertTarget(closed, index, "after")).toEqual({ parentId: "other", afterId: "misc" });
+    expect(insertTarget(closed, index, "before")).toEqual({ parentId: "other", afterId: null });
+    expect(insertTarget(row("bar"), index, "after")).toEqual({ parentId: "bar", afterId: null });
+  });
+});
+
+describe("isProtected / countDescendants", () => {
+  const index = indexTree([...sample, { id: "m", title: "managed", kind: "folder", locked: true, children: [{ id: "mb", title: "x", kind: "bookmark", url: "https://x/" }] }]);
+  it("protects top-level folders and anything managed", () => {
+    expect(isProtected(index, "bar")).toBe(true);
+    expect(isProtected(index, "mb")).toBe(true);
+    expect(isProtected(index, "dev")).toBe(false);
+  });
+  it("counts all nested items", () => {
+    expect(countDescendants(sample[0]!)).toBe(5);
   });
 });

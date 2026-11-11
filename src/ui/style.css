@@ -250,3 +250,24 @@
   padding-left: 2ch;
   color: var(--vb-dim);
 }
+
+/* ---- Editing ----------------------------------------------------------- */
+
+.vb-mode-input {
+  background: var(--vb-search);
+}
+
+.vb-mode-confirm {
+  background: var(--vb-error);
+}
+
+.vb-row.vb-cut .vb-name,
+.vb-row.vb-cut .vb-url {
+  opacity: 0.5;
+  font-style: italic;
+  text-decoration: line-through;
+}
+
+.vb-reg {
+  color: var(--vb-dim);
+}

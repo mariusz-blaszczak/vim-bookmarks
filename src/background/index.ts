@@ -1,9 +1,14 @@
 import { api } from "../shared/api";
-import type { Request, Response, ResponseMap } from "../shared/protocol";
+import { CHANGES_PORT, type Request, type Response, type ResponseMap } from "../shared/protocol";
 import { getTree } from "./bookmarks";
-import { openUrl } from "./open";
+import { currentPage, openUrl } from "./open";
+import { BookmarkOps, type BookmarksApi } from "./ops";
 
 const FALLBACK_WINDOW_KEY = "fallbackWindowId";
+
+const ops = new BookmarkOps(api.bookmarks as unknown as BookmarksApi);
+
+// ---- Requests from the UI ---------------------------------------------------
 
 // sendResponse + `return true` rather than returning a Promise: works in both
 // Chrome and Firefox regardless of version.
@@ -25,8 +30,64 @@ async function handle(
     case "open":
       await openUrl(msg.url, msg.where, sender);
       return null;
+    case "currentPage":
+      return currentPage(sender);
+    case "create":
+      return ops.create(msg.target, { title: msg.title, ...(msg.url !== undefined ? { url: msg.url } : {}) });
+    case "update":
+      await ops.update(msg.id, {
+        ...(msg.title !== undefined ? { title: msg.title } : {}),
+        ...(msg.url !== undefined ? { url: msg.url } : {}),
+      });
+      return null;
+    case "remove":
+      await ops.remove(msg.id);
+      return null;
+    case "move":
+      await ops.move(msg.ids, msg.target);
+      return null;
+    case "copy":
+      return ops.copy(msg.ids, msg.target);
+    default:
+      // A stale background (extension not reloaded after a rebuild) must not
+      // silently "succeed" on requests it doesn't know.
+      throw new Error(`Unknown request: ${(msg as { type?: unknown }).type} — reload the extension`);
   }
 }
+
+// ---- Change notifications ---------------------------------------------------
+
+const ports = new Set<chrome.runtime.Port>();
+let notifyTimer: ReturnType<typeof setTimeout> | undefined;
+
+api.runtime.onConnect.addListener((port) => {
+  if (port.name !== CHANGES_PORT) return;
+  ports.add(port);
+  port.onDisconnect.addListener(() => ports.delete(port));
+});
+
+/** Coalesce bursts (e.g. a folder copy fires one event per node). */
+function notifyChanged(): void {
+  clearTimeout(notifyTimer);
+  notifyTimer = setTimeout(() => {
+    for (const port of ports) {
+      try {
+        port.postMessage({ type: "changed" });
+      } catch {
+        ports.delete(port);
+      }
+    }
+  }, 50);
+}
+
+api.bookmarks.onCreated.addListener(notifyChanged);
+api.bookmarks.onRemoved.addListener(notifyChanged);
+api.bookmarks.onChanged.addListener(notifyChanged);
+api.bookmarks.onMoved.addListener(notifyChanged);
+// Not available in Firefox.
+api.bookmarks.onChildrenReordered?.addListener(notifyChanged);
+
+// ---- Toggle: overlay or fallback window -------------------------------------
 
 api.commands.onCommand.addListener((command, tab) => {
   if (command === "toggle-overlay") void toggle(tab);

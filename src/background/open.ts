@@ -1,5 +1,6 @@
 import { api } from "../shared/api";
 import type { OpenWhere } from "../shared/protocol";
+import type { PageInfo } from "../shared/types";
 
 export async function openUrl(
   url: string,
@@ -39,4 +40,11 @@ async function targetTab(sender: chrome.runtime.MessageSender): Promise<chrome.t
   } catch {
     return undefined;
   }
+}
+
+/** URL and title of the page the user is on (for "add bookmark"), if readable. */
+export async function currentPage(sender: chrome.runtime.MessageSender): Promise<PageInfo | null> {
+  const tab = await targetTab(sender);
+  if (!tab?.url) return null;
+  return { url: tab.url, title: tab.title ?? tab.url };
 }

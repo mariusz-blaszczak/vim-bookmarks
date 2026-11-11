@@ -35,6 +35,18 @@ export const DEFAULT_BINDINGS: readonly Binding[] = [
   { keys: "T", action: "open.background" },
   { keys: "w", action: "open.newWindow" },
 
+  // Edit
+  { keys: "a", action: "edit.addBookmark" },
+  { keys: "A", action: "edit.addFolder" },
+  { keys: "r", action: "edit.rename" },
+  { keys: "e", action: "edit.editUrl" },
+  { keys: "dd", action: "edit.cut" },
+  { keys: "yy", action: "edit.yank" },
+  { keys: "p", action: "edit.pasteAfter" },
+  { keys: "P", action: "edit.pasteBefore" },
+  { keys: "x", action: "edit.delete" },
+  { keys: "<Del>", action: "edit.delete" },
+
   // Search
   { keys: "/", action: "search.start" },
   { keys: "n", action: "search.next" },
@@ -55,4 +67,9 @@ export const DEFAULT_BINDINGS: readonly Binding[] = [
   { mode: "search", keys: "<C-p>", action: "search.prev" },
   { mode: "search", keys: "<Up>", action: "search.prev" },
   { mode: "search", keys: "<S-Tab>", action: "search.prev" },
+
+  // Text prompts (rename, URL, new folder…)
+  { mode: "prompt", keys: "<CR>", action: "prompt.accept" },
+  { mode: "prompt", keys: "<Esc>", action: "prompt.cancel" },
+  { mode: "prompt", keys: "<C-c>", action: "prompt.cancel" },
 ];

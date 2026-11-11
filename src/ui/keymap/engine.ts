@@ -1,6 +1,6 @@
 import { parseKeys } from "./keys";
 
-export type KeyMode = "normal" | "search";
+export type KeyMode = "normal" | "search" | "prompt";
 
 export interface Binding {
   /** Defaults to "normal". */

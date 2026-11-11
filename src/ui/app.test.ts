@@ -2,11 +2,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sample } from "./test-fixtures";
 
-const sent: unknown[] = [];
+import type { BNode } from "../shared/types";
+
+const sent: { type: string; [k: string]: unknown }[] = [];
+/** What the fake background returns for getTree; tests may mutate it. */
+let tree: BNode[] = structuredClone(sample);
+let onChange: (() => void) | undefined;
+
 vi.mock("../shared/protocol", () => ({
   send: vi.fn(async (req: { type: string }) => {
     sent.push(req);
-    return req.type === "getTree" ? structuredClone(sample) : null;
+    if (req.type === "getTree") return structuredClone(tree);
+    if (req.type === "create") return "new1";
+    if (req.type === "currentPage") return { url: "https://page.test/", title: "Page" };
+    return null;
+  }),
+  subscribeChanges: vi.fn((cb: () => void) => {
+    onChange = cb;
+    return () => (onChange = undefined);
   }),
 }));
 vi.mock("./ui-state", () => ({
@@ -48,6 +61,7 @@ async function setup() {
 describe("search in the app", () => {
   beforeEach(() => {
     sent.length = 0;
+    tree = structuredClone(sample);
     document.body.replaceChildren();
   });
   afterEach(() => vi.useRealTimers());
@@ -165,5 +179,106 @@ describe("search in the app", () => {
     expect(t.rowIds()).toEqual(["bar", "dev"]);
     t.press("l");
     expect(t.rowIds()).toEqual(["bar", "dev", "mdn"]);
+  });
+});
+
+describe("editing in the app", () => {
+  beforeEach(() => {
+    sent.length = 0;
+    tree = structuredClone(sample);
+    document.body.replaceChildren();
+  });
+
+  const edits = () => sent.filter((r) => r.type !== "getTree");
+
+  it("r opens a prefilled prompt; <CR> renames, digits and q are typed not executed", async () => {
+    const t = await setup();
+    t.press("j"); // gh
+    t.press("r");
+    expect(t.mode()).toBe("INPUT");
+    expect(t.q(".vb-prompt").textContent).toBe("Rename: ");
+    const input = t.q<HTMLInputElement>(".vb-input");
+    expect(input.value).toBe("gh");
+    expect(t.app.handleKey(new KeyboardEvent("keydown", { key: "q" }))).toBe(false);
+    expect(t.app.handleKey(new KeyboardEvent("keydown", { key: "5" }))).toBe(false);
+    expect(t.onClose).not.toHaveBeenCalled();
+    input.value = "GitHub";
+    t.press("<CR>");
+    await vi.waitFor(() => expect(edits()).toEqual([{ type: "update", id: "gh", title: "GitHub" }]));
+    expect(t.mode()).toBe("NORMAL");
+  });
+
+  it("<Esc> in a prompt cancels without changes", async () => {
+    const t = await setup();
+    t.press("j");
+    t.press("r");
+    t.press("<Esc>");
+    expect(t.mode()).toBe("NORMAL");
+    await Promise.resolve();
+    expect(edits()).toEqual([]);
+    expect(t.onClose).not.toHaveBeenCalled();
+  });
+
+  it("deleting a non-empty folder asks; only y confirms", async () => {
+    const t = await setup();
+    t.press("jj"); // dev
+    t.press("x");
+    expect(t.mode()).toBe("CONFIRM");
+    expect(t.cmd()).toBe('Delete folder "dev" and 2 items inside? [y/N]');
+    t.press("n");
+    expect(t.mode()).toBe("NORMAL");
+    await Promise.resolve();
+    expect(edits()).toEqual([]);
+
+    t.press("x");
+    t.press("y");
+    await vi.waitFor(() => expect(edits()).toEqual([{ type: "remove", id: "dev" }]));
+  });
+
+  it("dd marks the row as cut, p moves it next to the cursor", async () => {
+    const t = await setup();
+    t.press("j"); // gh
+    t.press("dd");
+    expect(t.q(".vb-cursor").classList.contains("vb-cut")).toBe(true);
+    expect(t.q(".vb-reg").textContent).toBe("cut 1");
+    t.press("G"); // other
+    t.press("p");
+    await vi.waitFor(() =>
+      expect(edits()).toEqual([{ type: "move", ids: ["gh"], target: { parentId: "other", afterId: "misc" } }]),
+    );
+    await vi.waitFor(() => expect(t.q(".vb-reg").textContent).toBe(""));
+  });
+
+  it("a adds the current page via the background in the fallback window", async () => {
+    const t = await setup();
+    t.press("j");
+    t.press("a");
+    await vi.waitFor(() => expect(t.mode()).toBe("INPUT"));
+    expect(t.q<HTMLInputElement>(".vb-input").value).toBe("Page");
+    t.press("<CR>");
+    await vi.waitFor(() =>
+      expect(edits()).toContainEqual({
+        type: "create",
+        target: { parentId: "bar", afterId: "gh" },
+        title: "Page",
+        url: "https://page.test/",
+      }),
+    );
+  });
+
+  it("built-in folders can't be edited", async () => {
+    const t = await setup();
+    t.press("x");
+    expect(t.cmd()).toBe("Built-in folders can't be changed");
+    expect(t.mode()).toBe("NORMAL");
+  });
+
+  it("reloads when bookmarks change elsewhere, keeping the cursor", async () => {
+    const t = await setup();
+    t.press("jjj"); // news
+    tree[0]!.children!.unshift({ id: "fresh", title: "fresh", kind: "bookmark", url: "https://fresh.test/" });
+    onChange!();
+    await vi.waitFor(() => expect(t.rowIds()).toEqual(["bar", "fresh", "gh", "dev", "news", "other"]));
+    expect(t.cursorName()).toBe("news");
   });
 });

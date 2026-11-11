@@ -41,7 +41,11 @@ function createOverlay(): Overlay {
     shadow.append(style, root);
     document.documentElement.append(host);
 
-    app = mountApp(root, { onClose: close, standalone: false });
+    app = mountApp(root, {
+      onClose: close,
+      standalone: false,
+      currentPage: () => ({ url: location.href, title: document.title || location.href }),
+    });
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("keyup", swallow, true);
     window.addEventListener("keypress", swallow, true);

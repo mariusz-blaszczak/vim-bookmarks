@@ -37,8 +37,8 @@ sterowany klawiaturą (domyślnie Vim, w pełni przemapowywalne).
 | `/` `n` `N` | fuzzy filtr po tytule i URL (w prompcie: `<CR>` zatwierdź, `<Esc>` anuluj, `<C-n>`/`<C-p>` następne/poprzednie) |
 | `a` `A` | dodaj bieżącą stronę / nowy folder |
 | `r` `e` | zmień nazwę / edytuj URL |
-| `dd` `yy` `p` `P` | wytnij / kopiuj / wklej za / przed |
-| `x` | usuń |
+| `dd` `yy` `p` `P` | oznacz do przeniesienia / do skopiowania (jak w rangerze) / wklej za / przed |
+| `x` `<Del>` | usuń (folder z zawartością wymaga potwierdzenia `y`) |
 | `V` + operator | operacje grupowe |
 | `u` `<C-r>` | undo / redo |
 | `:` | komendy (`:mkdir`, `:sort`, `:map`) |
@@ -53,7 +53,7 @@ Stos w `storage.session` (SW w MV3 może zostać ubity).
 - [x] **M0** — szkielet: build na obie przeglądarki, skrót otwiera/zamyka pusty overlay w Shadow DOM, fallback window.
 - [x] **M1** — odczyt: drzewo, ruch, zwijanie/rozwijanie, otwieranie, statusline.
 - [x] **M2** — wyszukiwanie: `/` fuzzy, `n`/`N`, podświetlanie.
-- [ ] **M3** — edycja: dodaj/zmień/usuń/wytnij/kopiuj/wklej/foldery, live refresh po `bookmarks.on*`.
+- [x] **M3** — edycja: dodaj/zmień/usuń/wytnij/kopiuj/wklej/foldery, live refresh po `bookmarks.on*`.
 - [ ] **M4** — visual mode + undo/redo.
 - [ ] **M5** — konfiguracja: strona opcji, keymap w `storage.sync`, `:map`, motyw.
 - [ ] **M6** — szlif: wydajność (~10k zakładek), a11y (ARIA tree), paczki Chrome Web Store / AMO.

@@ -4,6 +4,7 @@ import type { BNode, NodeKind, RootRole } from "../shared/types";
 type RawNode = chrome.bookmarks.BookmarkTreeNode & {
   type?: "bookmark" | "folder" | "separator"; // Firefox
   folderType?: string; // Chrome 134+
+  unmodifiable?: string; // Chrome managed bookmarks
 };
 
 const ROLE_BY_ID: Record<string, RootRole> = {
@@ -36,6 +37,7 @@ export function normalize(raw: RawNode, topLevel = false): BNode {
   const node: BNode = { id: raw.id, title: raw.title, kind };
   if (raw.parentId !== undefined) node.parentId = raw.parentId;
   if (kind === "bookmark" && raw.url !== undefined) node.url = raw.url;
+  if (raw.unmodifiable) node.locked = true;
   if (kind === "folder") {
     node.children = (raw.children ?? []).map((c) => normalize(c));
     if (topLevel) {
