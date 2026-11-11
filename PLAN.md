@@ -32,7 +32,7 @@ sterowany klawiaturą (domyślnie Vim, w pełni przemapowywalne).
 | Klawisz | Akcja |
 |---|---|
 | `j k` `gg G` `<C-d> <C-u>` | ruch |
-| `h l` `za` `zM zR` | zwiń / rozwiń / przełącz / wszystko |
+| `h l` `za` `zo zc` `zM zR` `-` | zwiń / rozwiń / przełącz / wszystko / do rodzica |
 | `<CR>` `t` `T` `w` | otwórz: tutaj / nowa karta / tło / nowe okno |
 | `/` `n` `N` | fuzzy filtr po tytule i URL |
 | `a` `A` | dodaj bieżącą stronę / nowy folder |
@@ -51,7 +51,7 @@ Stos w `storage.session` (SW w MV3 może zostać ubity).
 
 ## Kamienie milowe
 - [x] **M0** — szkielet: build na obie przeglądarki, skrót otwiera/zamyka pusty overlay w Shadow DOM, fallback window.
-- [ ] **M1** — odczyt: drzewo, ruch, zwijanie/rozwijanie, otwieranie, statusline.
+- [x] **M1** — odczyt: drzewo, ruch, zwijanie/rozwijanie, otwieranie, statusline.
 - [ ] **M2** — wyszukiwanie: `/` fuzzy, `n`/`N`, podświetlanie.
 - [ ] **M3** — edycja: dodaj/zmień/usuń/wytnij/kopiuj/wklej/foldery, live refresh po `bookmarks.on*`.
 - [ ] **M4** — visual mode + undo/redo.

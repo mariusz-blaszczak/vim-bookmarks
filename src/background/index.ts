@@ -1,6 +1,32 @@
 import { api } from "../shared/api";
+import type { Request, Response, ResponseMap } from "../shared/protocol";
+import { getTree } from "./bookmarks";
+import { openUrl } from "./open";
 
 const FALLBACK_WINDOW_KEY = "fallbackWindowId";
+
+// sendResponse + `return true` rather than returning a Promise: works in both
+// Chrome and Firefox regardless of version.
+api.runtime.onMessage.addListener((msg: Request, sender, sendResponse: (r: Response) => void) => {
+  handle(msg, sender).then(
+    (value) => sendResponse({ ok: true, value }),
+    (err: unknown) => sendResponse({ ok: false, error: err instanceof Error ? err.message : String(err) }),
+  );
+  return true;
+});
+
+async function handle(
+  msg: Request,
+  sender: chrome.runtime.MessageSender,
+): Promise<ResponseMap[Request["type"]]> {
+  switch (msg.type) {
+    case "getTree":
+      return getTree();
+    case "open":
+      await openUrl(msg.url, msg.where, sender);
+      return null;
+  }
+}
 
 api.commands.onCommand.addListener((command, tab) => {
   if (command === "toggle-overlay") void toggle(tab);

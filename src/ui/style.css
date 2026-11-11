@@ -10,6 +10,9 @@
   --vb-accent-fg: #ffffff;
   --vb-status-bg: #eceef1;
   --vb-scrim: rgba(15, 18, 22, 0.35);
+  --vb-cursor-bg: #e4ebf8;
+  --vb-folder: #1f5fbf;
+  --vb-error: #c62828;
 
   position: fixed;
   inset: 0;
@@ -34,6 +37,9 @@
     --vb-accent-fg: #11131a;
     --vb-status-bg: #1f2229;
     --vb-scrim: rgba(0, 0, 0, 0.5);
+    --vb-cursor-bg: #262b36;
+    --vb-folder: #7aa2f7;
+    --vb-error: #f7768e;
   }
 }
 
@@ -72,18 +78,77 @@
 }
 
 .vb-body {
+  position: relative;
   flex: 1;
-  overflow: auto;
-  padding: 6px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
-.vb-line {
-  padding: 0 12px;
+.vb-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.vb-row {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  line-height: 20px;
+  padding-right: 12px;
   white-space: pre;
+  cursor: default;
+  user-select: none;
 }
 
-.vb-dim {
+.vb-row.vb-cursor {
+  background: var(--vb-cursor-bg);
+  box-shadow: inset 2px 0 0 var(--vb-accent);
+}
+
+.vb-fold {
+  flex: none;
   color: var(--vb-dim);
+}
+
+.vb-name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vb-folder .vb-name {
+  color: var(--vb-folder);
+  font-weight: 600;
+}
+
+.vb-count {
+  flex: none;
+  color: var(--vb-dim);
+}
+
+.vb-url {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 40%;
+  margin-left: auto;
+  padding-left: 2ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--vb-dim);
+}
+
+.vb-sep {
+  flex: 1;
+  height: 0;
+  border-top: 1px dashed var(--vb-border);
+}
+
+.vb-error {
+  color: var(--vb-error);
 }
 
 .vb-status {
@@ -108,7 +173,11 @@
   white-space: nowrap;
 }
 
-.vb-status-hint {
+.vb-showcmd {
+  color: var(--vb-dim);
+}
+
+.vb-pos {
   padding-right: 12px;
   color: var(--vb-dim);
 }
