@@ -191,6 +191,23 @@ describe("editing in the app", () => {
 
   const edits = () => sent.filter((r) => r.type !== "getTree");
 
+  it("? shows the key bindings and q / ? / <Esc> close only the help", async () => {
+    const t = await setup();
+    for (const closeKey of ["q", "?", "<Esc>"]) {
+      t.press("?");
+      expect(t.mode()).toBe("HELP");
+      expect(t.q<HTMLElement>(".vb-help").hidden).toBe(false);
+      expect(t.q<HTMLElement>(".vb-body").hidden).toBe(true);
+      expect(t.q(".vb-help").textContent).toContain("Rename");
+      t.press("j"); // scrolls the help, doesn't move the tree cursor
+      t.press(closeKey);
+      expect(t.mode()).toBe("NORMAL");
+      expect(t.q<HTMLElement>(".vb-help").hidden).toBe(true);
+      expect(t.cursorName()).toBe("bar");
+    }
+    expect(t.onClose).not.toHaveBeenCalled();
+  });
+
   it("r opens a prefilled prompt; <CR> renames, digits and q are typed not executed", async () => {
     const t = await setup();
     t.press("j"); // gh

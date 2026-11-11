@@ -2,13 +2,14 @@ import { send, subscribeChanges, type OpenWhere } from "../shared/protocol";
 import type { BNode, PageInfo } from "../shared/types";
 import { ACTIONS, type Ctx } from "./actions";
 import { createEditor, type Register } from "./edit";
+import { helpSections } from "./help";
 import { DEFAULT_BINDINGS } from "./keymap/defaults";
 import { bindingsFor, KeyEngine, type Match } from "./keymap/engine";
 import { eventToToken } from "./keymap/keys";
 import { flattenFiltered, searchTree, type Hit } from "./search";
 import { clamp, flatten, indexTree, type Row, type TreeIndex } from "./tree";
 import { loadUiState, saveUiState } from "./ui-state";
-import { TreeView } from "./view";
+import { ROW_HEIGHT, TreeView } from "./view";
 
 export interface AppOptions {
   onClose(): void;
@@ -25,13 +26,14 @@ export interface App {
   destroy(): void;
 }
 
-type Mode = "NORMAL" | "SEARCH" | "PROMPT" | "CONFIRM";
+type Mode = "NORMAL" | "SEARCH" | "PROMPT" | "CONFIRM" | "HELP";
 
 const MODE_LABEL: Record<Mode, string> = {
   NORMAL: "NORMAL",
   SEARCH: "SEARCH",
   PROMPT: "INPUT",
   CONFIRM: "CONFIRM",
+  HELP: "HELP",
 };
 
 interface Search {
@@ -64,6 +66,10 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
 
   const title = el("div", "vb-title", "Bookmarks");
   const body = el("div", "vb-body");
+  const help = el("div", "vb-help");
+  help.hidden = true;
+  help.setAttribute("role", "document");
+  help.setAttribute("aria-label", "Keyboard shortcuts");
 
   const status = el("div", "vb-status");
   const modeEl = el("span", "vb-mode");
@@ -84,7 +90,7 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
   const cmdRightEl = el("span", "vb-cmdright");
   cmdline.append(promptEl, input, cmdTextEl, cmdRightEl);
 
-  win.append(title, body, status, cmdline);
+  win.append(title, body, help, status, cmdline);
   root.append(win);
 
   // ---- State ---------------------------------------------------------------
@@ -129,6 +135,7 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
     NORMAL: new KeyEngine(bindingsFor("normal", DEFAULT_BINDINGS), onMatch),
     SEARCH: new KeyEngine(bindingsFor("search", DEFAULT_BINDINGS), onMatch, { counts: false }),
     PROMPT: new KeyEngine(bindingsFor("prompt", DEFAULT_BINDINGS), onMatch, { counts: false }),
+    HELP: new KeyEngine(bindingsFor("help", DEFAULT_BINDINGS), onMatch),
   };
   const engine = (): KeyEngine | undefined => (mode === "CONFIRM" ? undefined : engines[mode]);
 
@@ -164,6 +171,9 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
       cmdTextEl.textContent = pendingConfirm?.text ?? "";
     } else if (mode === "PROMPT") {
       cmdRightEl.textContent = "<CR> ok · <Esc> cancel";
+    } else if (mode === "HELP") {
+      cmdTextEl.textContent = "j/k scroll · ? or q close";
+      cmdTextEl.classList.add("vb-dim");
     } else if (msg) {
       cmdTextEl.textContent = msg.text;
       cmdTextEl.classList.toggle("vb-error", msg.error);
@@ -246,6 +256,27 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
     } else {
       win.focus({ preventScroll: true });
     }
+  }
+
+  // ---- Help ----------------------------------------------------------------
+  function renderHelp(): void {
+    const nodes = helpSections(DEFAULT_BINDINGS).map((section) => {
+      const sec = el("section", "vb-help-section");
+      sec.append(el("h2", "vb-help-title", section.title));
+      const list = el("dl", "vb-help-list");
+      for (const entry of section.entries) {
+        const keys = el("dt", "vb-help-keys");
+        entry.keys.forEach((k, i) => {
+          if (i > 0) keys.append(" ");
+          keys.append(el("kbd", "", k));
+        });
+        list.append(keys, el("dd", "vb-help-desc", entry.description));
+      }
+      sec.append(list);
+      return sec;
+    });
+    const tip = el("p", "vb-help-tip", "Prefix motions with a count, e.g. 5j or 3n.");
+    help.replaceChildren(...nodes, tip);
   }
 
   // ---- Prompts -------------------------------------------------------------
@@ -447,6 +478,28 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
       if (wrapped && mode === "NORMAL") {
         ctx.message(direction > 0 ? "search hit BOTTOM, continuing at TOP" : "search hit TOP, continuing at BOTTOM");
       }
+    },
+
+    openHelp() {
+      renderHelp();
+      body.hidden = true;
+      help.hidden = false;
+      help.scrollTop = 0;
+      enterMode("HELP");
+    },
+    closeHelp() {
+      if (mode !== "HELP") return;
+      help.hidden = true;
+      body.hidden = false;
+      enterMode("NORMAL");
+      render();
+    },
+    scrollHelp(lines) {
+      const max = help.scrollHeight - help.clientHeight;
+      help.scrollTop = Math.max(0, Math.min(max, help.scrollTop + lines * ROW_HEIGHT));
+    },
+    get helpPageSize() {
+      return Math.max(1, Math.floor(help.clientHeight / ROW_HEIGHT));
     },
 
     promptAccept: () => finishPrompt(input.value),

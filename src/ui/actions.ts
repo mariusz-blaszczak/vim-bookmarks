@@ -26,6 +26,13 @@ export interface Ctx {
 
   promptAccept(): void;
   promptCancel(): void;
+
+  openHelp(): void;
+  closeHelp(): void;
+  /** Scroll the help screen by lines; Infinity / -Infinity go to the end / start. */
+  scrollHelp(lines: number): void;
+  /** Lines visible on the help screen. */
+  readonly helpPageSize: number;
   readonly edit: Editor;
 }
 
@@ -126,5 +133,13 @@ export const ACTIONS: Record<string, ActionFn> = {
   "prompt.cancel": (ctx) => ctx.promptCancel(),
 
   close: (ctx) => ctx.close(),
+  "help.open": (ctx) => ctx.openHelp(),
+  "help.close": (ctx) => ctx.closeHelp(),
+  "help.down": (ctx, n) => ctx.scrollHelp(n ?? 1),
+  "help.up": (ctx, n) => ctx.scrollHelp(-(n ?? 1)),
+  "help.pageDown": (ctx, n) => ctx.scrollHelp((n ?? 1) * Math.max(1, ctx.helpPageSize - 2)),
+  "help.pageUp": (ctx, n) => ctx.scrollHelp(-(n ?? 1) * Math.max(1, ctx.helpPageSize - 2)),
+  "help.top": (ctx) => ctx.scrollHelp(-Infinity),
+  "help.bottom": (ctx) => ctx.scrollHelp(Infinity),
   escape: (ctx) => (ctx.filtered ? ctx.clearSearch() : ctx.close()),
 };

@@ -53,6 +53,7 @@ export const DEFAULT_BINDINGS: readonly Binding[] = [
   { keys: "N", action: "search.prev" },
 
   // Overlay
+  { keys: "?", action: "help.open" },
   { keys: "q", action: "close" },
   // Clears an active search filter first, then closes.
   { keys: "<Esc>", action: "escape" },
@@ -72,4 +73,25 @@ export const DEFAULT_BINDINGS: readonly Binding[] = [
   { mode: "prompt", keys: "<CR>", action: "prompt.accept" },
   { mode: "prompt", keys: "<Esc>", action: "prompt.cancel" },
   { mode: "prompt", keys: "<C-c>", action: "prompt.cancel" },
+
+  // Help screen (?)
+  { mode: "help", keys: "j", action: "help.down" },
+  { mode: "help", keys: "<Down>", action: "help.down" },
+  { mode: "help", keys: "k", action: "help.up" },
+  { mode: "help", keys: "<Up>", action: "help.up" },
+  { mode: "help", keys: "<C-d>", action: "help.pageDown" },
+  { mode: "help", keys: "<C-f>", action: "help.pageDown" },
+  { mode: "help", keys: "<PageDown>", action: "help.pageDown" },
+  { mode: "help", keys: "<Space>", action: "help.pageDown" },
+  { mode: "help", keys: "<C-u>", action: "help.pageUp" },
+  { mode: "help", keys: "<C-b>", action: "help.pageUp" },
+  { mode: "help", keys: "<PageUp>", action: "help.pageUp" },
+  { mode: "help", keys: "gg", action: "help.top" },
+  { mode: "help", keys: "<Home>", action: "help.top" },
+  { mode: "help", keys: "G", action: "help.bottom" },
+  { mode: "help", keys: "<End>", action: "help.bottom" },
+  { mode: "help", keys: "?", action: "help.close" },
+  { mode: "help", keys: "q", action: "help.close" },
+  { mode: "help", keys: "<Esc>", action: "help.close" },
+  { mode: "help", keys: "<C-c>", action: "help.close" },
 ];

@@ -36,6 +36,10 @@ function makeCtx(expandedIds: string[], cursorId: string) {
     jumpMatch: () => {},
     promptAccept: () => {},
     promptCancel: () => {},
+    openHelp: () => {},
+    closeHelp: () => {},
+    scrollHelp: () => {},
+    helpPageSize: 10,
     edit: {} as Ctx["edit"],
   };
   const run = (action: string, count: number | null = null) => ACTIONS[action]!(ctx, count);

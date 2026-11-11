@@ -271,3 +271,69 @@
 .vb-reg {
   color: var(--vb-dim);
 }
+
+/* ---- Help (?) ------------------------------------------------------------ */
+
+.vb-body[hidden],
+.vb-help[hidden] {
+  display: none;
+}
+
+.vb-help {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 12px 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  align-content: start;
+  gap: 12px 24px;
+}
+
+.vb-help-section {
+  min-width: 0;
+}
+
+.vb-help-title {
+  margin: 0 0 4px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--vb-folder);
+  border-bottom: 1px solid var(--vb-border);
+}
+
+.vb-help-list {
+  display: grid;
+  grid-template-columns: minmax(10ch, max-content) 1fr;
+  gap: 0 2ch;
+  margin: 0;
+  line-height: 20px;
+}
+
+.vb-help-keys {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.vb-help-keys kbd {
+  font: inherit;
+  color: var(--vb-accent);
+}
+
+.vb-help-desc {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vb-help-tip {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--vb-dim);
+}
+
+.vb-mode-help {
+  background: var(--vb-folder);
+}
