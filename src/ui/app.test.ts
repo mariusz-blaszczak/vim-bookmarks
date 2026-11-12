@@ -298,4 +298,15 @@ describe("editing in the app", () => {
     await vi.waitFor(() => expect(t.rowIds()).toEqual(["bar", "fresh", "gh", "dev", "news", "other"]));
     expect(t.cursorName()).toBe("news");
   });
+
+  it("shows the total bookmark count in the title and keeps it current", async () => {
+    const t = await setup();
+    expect(t.q(".vb-total").textContent).toBe("5 bookmarks");
+    // Folder counts include bookmarks in subfolders: bar has gh, news + dev/{mdn, rust}.
+    const counts = [...t.root.querySelectorAll(".vb-folder")].map((r) => r.querySelector(".vb-count")!.textContent);
+    expect(counts).toEqual([" 4", " 2", " 1"]); // bar, dev, other
+    tree[0]!.children!.unshift({ id: "fresh", title: "fresh", kind: "bookmark", url: "https://fresh.test/" });
+    onChange!();
+    await vi.waitFor(() => expect(t.q(".vb-total").textContent).toBe("6 bookmarks"));
+  });
 });

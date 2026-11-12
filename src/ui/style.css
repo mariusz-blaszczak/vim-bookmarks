@@ -81,10 +81,20 @@
 }
 
 .vb-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
   padding: 6px 12px;
   border-bottom: 1px solid var(--vb-border);
   font-weight: 600;
   letter-spacing: 0.02em;
+}
+
+.vb-total {
+  color: var(--vb-dim);
+  font-weight: 400;
+  letter-spacing: normal;
 }
 
 .vb-body {

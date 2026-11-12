@@ -7,7 +7,7 @@ import { DEFAULT_BINDINGS } from "./keymap/defaults";
 import { bindingsFor, KeyEngine, type Match } from "./keymap/engine";
 import { eventToToken } from "./keymap/keys";
 import { flattenFiltered, searchTree, type Hit } from "./search";
-import { clamp, flatten, indexTree, type Row, type TreeIndex } from "./tree";
+import { clamp, countBookmarks, flatten, indexTree, type Row, type TreeIndex } from "./tree";
 import { loadUiState, saveUiState } from "./ui-state";
 import { ROW_HEIGHT, TreeView } from "./view";
 
@@ -64,7 +64,9 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
   win.setAttribute("role", "dialog");
   win.setAttribute("aria-label", "Bookmarks");
 
-  const title = el("div", "vb-title", "Bookmarks");
+  const title = el("div", "vb-title");
+  const totalEl = el("span", "vb-total");
+  title.append(el("span", "vb-title-text", "Bookmarks"), totalEl);
   const body = el("div", "vb-body");
   const help = el("div", "vb-help");
   help.hidden = true;
@@ -144,6 +146,10 @@ export function mountApp(root: HTMLElement, opts: AppOptions): App {
     body.classList.toggle("vb-filtered", search !== null);
     const cut = new Set(register?.op === "cut" ? register.ids : []);
     view.update(rows, cursor, { hits: search?.hits, cut });
+    if (loaded) {
+      const total = countBookmarks(roots);
+      totalEl.textContent = `${total} bookmark${total === 1 ? "" : "s"}`;
+    }
     renderStatus();
   }
 

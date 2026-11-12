@@ -1,6 +1,6 @@
 import { renderIcon } from "./icons";
 import type { Hit } from "./search";
-import type { Row } from "./tree";
+import { countBookmarks, type Row } from "./tree";
 
 export const ROW_HEIGHT = 20;
 const OVERSCAN = 8;
@@ -163,7 +163,7 @@ function renderRow(row: Row, index: number, isCursor: boolean, hit: Hit | undefi
         span("vb-fold", row.open ? "▾ " : "▸ "),
         renderIcon(node, row.open),
         highlighted("vb-name", node.title || "(untitled)", node.title ? hit?.title : []),
-        span("vb-count", ` ${node.children?.length ?? 0}`),
+        span("vb-count", ` ${countBookmarks(node.children ?? [])}`),
       );
       break;
     }

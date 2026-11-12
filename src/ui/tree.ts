@@ -78,6 +78,11 @@ export function isProtected(index: TreeIndex, id: string): boolean {
   return index.parent(id) === undefined || index.path(id).some((n) => n.locked);
 }
 
+/** Number of bookmarks (not folders or separators) anywhere under `nodes`. */
+export function countBookmarks(nodes: readonly BNode[]): number {
+  return nodes.reduce((n, c) => n + (c.kind === "bookmark" ? 1 : 0) + countBookmarks(c.children ?? []), 0);
+}
+
 export function countDescendants(node: BNode): number {
   return (node.children ?? []).reduce((n, c) => n + 1 + countDescendants(c), 0);
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { BNode } from "../shared/types";
 import { sample } from "./test-fixtures";
-import { countDescendants, flatten, indexTree, insertTarget, isProtected, parentRow } from "./tree";
+import { countBookmarks, countDescendants, flatten, indexTree, insertTarget, isProtected, parentRow } from "./tree";
 
 const ids = (rows: { node: BNode }[]) => rows.map((r) => r.node.id);
 
@@ -76,5 +76,13 @@ describe("isProtected / countDescendants", () => {
   });
   it("counts all nested items", () => {
     expect(countDescendants(sample[0]!)).toBe(5);
+  });
+});
+
+describe("countBookmarks", () => {
+  it("counts bookmarks at every depth, ignoring folders and separators", () => {
+    expect(countBookmarks(sample)).toBe(5);
+    expect(countBookmarks([{ id: "s", title: "", kind: "separator" }, ...sample])).toBe(5);
+    expect(countBookmarks([])).toBe(0);
   });
 });
