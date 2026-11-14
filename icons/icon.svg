@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- terminal-style tile -->
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="#16181d"/>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="none" stroke="#2c313a" stroke-width="4"/>
+  <!-- bookmark ribbon -->
+  <path d="M38 22 h52 a4 4 0 0 1 4 4 v80 l-30 -22 l-30 22 v-80 a4 4 0 0 1 4 -4 z" fill="#4c8dff"/>
+  <!-- block cursor -->
+  <rect x="54" y="38" width="20" height="32" rx="2" fill="#16181d"/>
+</svg>

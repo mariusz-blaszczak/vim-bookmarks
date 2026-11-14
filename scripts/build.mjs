@@ -1,5 +1,5 @@
 import * as esbuild from "esbuild";
-import { mkdir, readFile, rm, writeFile, copyFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile, copyFile, cp } from "node:fs/promises";
 import { join } from "node:path";
 
 const TARGETS = ["chrome", "firefox"];
@@ -27,6 +27,7 @@ async function writeStatic(target, outdir) {
   manifest.version = pkg.version;
   await writeFile(join(outdir, "manifest.json"), JSON.stringify(manifest, null, 2));
   await copyFile("src/ui/ui.html", join(outdir, "ui.html"));
+  await cp("icons", join(outdir, "icons"), { recursive: true, filter: (f) => !f.endsWith(".svg") });
 }
 
 for (const target of TARGETS) {

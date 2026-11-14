@@ -3,9 +3,11 @@
   "name": "vim-bookmarks",
   "description": "Keyboard-driven, TUI-style bookmark manager.",
   "homepage_url": "https://github.com/mariusz-blaszczak/vim-bookmarks",
+  "icons": { "16": "icons/icon-16.png", "32": "icons/icon-32.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" },
   "permissions": ["activeTab", "scripting", "bookmarks", "storage"],
   "action": {
-    "default_title": "vim-bookmarks (Alt+B)"
+    "default_title": "vim-bookmarks (Alt+B)",
+    "default_icon": { "16": "icons/icon-16.png", "32": "icons/icon-32.png" }
   },
   "commands": {
     "toggle-overlay": {
