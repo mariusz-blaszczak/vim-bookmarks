@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+      WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check tag matches package.json version
+        run: |
+          v="$(node -p 'require("./package.json").version')"
+          [ "v$v" = "$GITHUB_REF_NAME" ] || { echo "Tag $GITHUB_REF_NAME != package.json v$v"; exit 1; }
+
+      - run: npm run check
+
+      - run: npm run package
+
+      # Optional: a signed .xpi installs permanently in regular Firefox.
+      # Requires AMO API keys (https://addons.mozilla.org/developers/addon/api/key/)
+      # stored as repo secrets AMO_JWT_ISSUER / AMO_JWT_SECRET. Signing is
+      # "unlisted": the add-on is NOT published on the AMO store.
+      - name: Sign Firefox add-on (unlisted)
+        if: ${{ env.WEB_EXT_API_KEY != '' }}
+        run: npm run sign:firefox
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" web-ext-artifacts/* --title "$GITHUB_REF_NAME" --generate-notes

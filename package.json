@@ -1,6 +1,6 @@
 {
   "name": "vim-bookmarks",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,7 +11,11 @@
     "lint:firefox": "web-ext lint --source-dir dist/firefox",
     "run:firefox": "web-ext run --source-dir dist/firefox",
     "run:chrome": "web-ext run --target chromium --source-dir dist/chrome",
-    "test": "vitest run"
+    "test": "vitest run",
+    "package": "npm run build && npm run package:chrome && npm run package:firefox",
+    "package:chrome": "web-ext build -s dist/chrome -a web-ext-artifacts -n vim-bookmarks-chrome-$npm_package_version.zip -o",
+    "package:firefox": "web-ext build -s dist/firefox -a web-ext-artifacts -n vim-bookmarks-firefox-$npm_package_version.zip -o",
+    "sign:firefox": "web-ext sign -s dist/firefox -a web-ext-artifacts --channel unlisted"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.7",
@@ -20,5 +24,10 @@
     "typescript": "^7.0.2",
     "vitest": "^4.1.12",
     "web-ext": "^10.8.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mariusz-blaszczak/vim-bookmarks"
   }
 }

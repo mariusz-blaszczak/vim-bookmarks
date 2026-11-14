@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "vim-bookmarks",
   "description": "Keyboard-driven, TUI-style bookmark manager.",
+  "homepage_url": "https://github.com/mariusz-blaszczak/vim-bookmarks",
   "permissions": ["activeTab", "scripting", "bookmarks", "storage"],
   "action": {
     "default_title": "vim-bookmarks (Alt+B)"
