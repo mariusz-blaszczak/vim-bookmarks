@@ -66,7 +66,7 @@ npm run package      # zips in web-ext-artifacts/
 ### Releasing
 
 1. Bump `version` in `package.json`, commit.
-2. `git tag v<version> && git push --follow-tags`.
+2. `git tag v<version> && git push origin main v<version>`.
 3. GitHub Actions builds, tests, and attaches the zips to a new GitHub release.
    If repo secrets `AMO_JWT_ISSUER` / `AMO_JWT_SECRET` are set, it also signs the Firefox build
    as **unlisted** on addons.mozilla.org (not published in the store) and attaches a `.xpi`.
